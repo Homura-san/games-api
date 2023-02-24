@@ -2,6 +2,11 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 
+const connection = require('./database/database')
+
+const Game = require('./games/Game')
+
+// Body parser
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
@@ -50,19 +55,22 @@ app.get('/game/:id', (req, res) => {
     }    
 })
 
+// Atualizado pro sequelize
 app.post('/game', (req, res) => {
     // Precisa de verificação
     var {title, year, price} = req.body;
 
     if(title !== undefined && year !== undefined && price !== undefined){
-        DB.games.push({
-            id: 2323,
+        Game.create({
             title,
             year,
             price
+        }).then(() => {
+            res.sendStatus(200)
+        }).catch(err => {
+            res.sendStatus(500)
         })
     
-        res.sendStatus(200)
     }else{
         res.sendStatus(400)
     }
