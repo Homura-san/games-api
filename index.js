@@ -10,6 +10,13 @@ const Game = require('./games/Game')
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
+// Database
+connection
+    .authenticate()
+    .then(() => {
+        console.log('Conexão feita"')
+    }).catch((err) => {console.log(err)})
+
 var DB = {
     games: [
         {
@@ -34,8 +41,7 @@ var DB = {
 }
 
 app.get('/games', (req, res) => {
-    res.statusCode = 200;
-    res.json(DB.games)
+    Game.findAll().then(game => res.json(game))
 })
 
 app.get('/game/:id', (req, res) => {
@@ -44,14 +50,16 @@ app.get('/game/:id', (req, res) => {
     }else{
         var id = parseInt(req.params.id)
 
-        var game = DB.games.find(g => g.id == id)
-
-        if(game != undefined){
-            res.statusCode = 200;
-            res.json(game)
-        }else{
-            res.sendStatus(404);
-        }
+        Game.findOne({
+            where: {id}
+        }).then(game => {
+            if(game != undefined){
+                res.statusCode = 200;
+                res.json(game)
+            }else{
+                res.sendStatus(404);
+            }
+        }).catch(err => res.sendStatus(500));
     }    
 })
 
@@ -74,9 +82,6 @@ app.post('/game', (req, res) => {
     }else{
         res.sendStatus(400)
     }
-
-    
-
 })
 
 app.delete('/game/:id', (req, res) => {
@@ -84,48 +89,44 @@ app.delete('/game/:id', (req, res) => {
         res.sendStatus(400);
     }else{
         var id = parseInt(req.params.id)
-        var index = DB.games.findIndex(g => g.id == id)
         
-        if(index == -1){
-            res.sendStatus(404)
-        }else{
-            DB.games.splice(index, 1)
+        Game.destroy({where: {id: id}}).then(() => {
             res.sendStatus(200)
-        }
+        }).catch(err => res.sendStatus(404));
     } 
 })
 
 app.put('/game/:id', (req, res) => {
+    
+    async function up(params, where) {
+        try {
+            await Game.update( {...params}, {where: {...where}})
+            res.sendStatus(200)   
+        } catch (error) {
+            res.sendStatus(404)
+        }
+    }
+    
     if(isNaN(req.params.id)){
         res.sendStatus(400);
     }else{
         var id = parseInt(req.params.id)
 
-        var game = DB.games.find(g => g.id == id)
+        var {title, year, price} = req.body;
+        if(title !== undefined){
+            up({title: title}, {id: id});
+        }
 
-        if(game != undefined){
-            // Não possui verificação porque alguns campos podem vir nulos
-            var {title, year, price} = req.body;
+        if(year !== undefined){
+            up({year: year}, {id: id});
+        }
 
-            if(title !== undefined){
-                game.title = title;
+        if(price !== undefined){
+            if(isNaN(price)){
+                res.sendStatus(400)
+            }else{
+                up({price: price}, {id: id});
             }
-
-            if(year !== undefined){
-                game.year = year;
-            }
-
-            if(price !== undefined){
-                if(isNaN(price)){
-                    res.sendStatus(400)
-                }else{
-                    game.price = price;
-                }
-            }
-
-            res.sendStatus(200)
-        }else{
-            res.sendStatus(404);
         }
     }
 })
