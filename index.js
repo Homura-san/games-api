@@ -17,29 +17,6 @@ connection
         console.log('Conexão feita"')
     }).catch((err) => {console.log(err)})
 
-var DB = {
-    games: [
-        {
-            id: 23,
-            title: "call of duty MW",
-            year: 2019,
-            price: 60
-        },
-        {
-            id: 65,
-            title: "Sea of Thieves",
-            year: 2018,
-            price: 40
-        },
-        {
-            id: 2,
-            title: "Minecraft",
-            year: 2012,
-            price: 20
-        }
-    ]
-}
-
 app.get('/games', (req, res) => {
     Game.findAll().then(game => res.json(game))
 })
@@ -134,3 +111,26 @@ app.put('/game/:id', (req, res) => {
 app.listen(45678, () => {
     console.log('API rodando!');
 })
+
+// var DB = {
+//     games: [
+//         {
+//             id: 23,
+//             title: "call of duty MW",
+//             year: 2019,
+//             price: 60
+//         },
+//         {
+//             id: 65,
+//             title: "Sea of Thieves",
+//             year: 2018,
+//             price: 40
+//         },
+//         {
+//             id: 2,
+//             title: "Minecraft",
+//             year: 2012,
+//             price: 20
+//         }
+//     ]
+// }
