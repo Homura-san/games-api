@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const connection = require('./database/database')
 
 const Game = require('./games/Game')
+
+app.use(cors())
 
 // Body parser
 app.use(bodyParser.urlencoded({extended: false}))
@@ -14,10 +17,10 @@ app.use(bodyParser.json())
 connection
     .authenticate()
     .then(() => {
-        console.log('Conexão feita"')
+        console.log('Conexão feita')
     }).catch((err) => {console.log(err)})
 
-app.get('/games', (req, res) => {
+    app.get('/games', (req, res) => {
     Game.findAll().then(game => res.json(game))
 })
 
