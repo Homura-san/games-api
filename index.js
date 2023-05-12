@@ -6,6 +6,7 @@ const cors = require('cors')
 const connection = require('./database/database')
 
 const Game = require('./games/Game')
+const User = require('./users/User')
 
 app.use(cors())
 
@@ -19,6 +20,7 @@ connection
     .then(() => {
         console.log('Conexão feita')
     }).catch((err) => {console.log(err)})
+
 
     app.get('/games', (req, res) => {
     Game.findAll().then(game => res.json(game))
@@ -111,29 +113,22 @@ app.put('/game/:id', (req, res) => {
     }
 })
 
+app.post('/users', (req, res) => {
+    var usuario = {
+        name: "Erick Patrick",
+        email: "erick@email.com",
+        password: '123456'
+    }
+
+    User.create({
+        ...usuario
+    }).then(() => {
+        res.json("Feito!")
+    }).catch(err => {
+        res.json("Ocorreu um erro: "+ err)
+    })
+})
+
 app.listen(45678, () => {
     console.log('API rodando!');
 })
-
-// var DB = {
-//     games: [
-//         {
-//             id: 23,
-//             title: "call of duty MW",
-//             year: 2019,
-//             price: 60
-//         },
-//         {
-//             id: 65,
-//             title: "Sea of Thieves",
-//             year: 2018,
-//             price: 40
-//         },
-//         {
-//             id: 2,
-//             title: "Minecraft",
-//             year: 2012,
-//             price: 20
-//         }
-//     ]
-// }
