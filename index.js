@@ -113,22 +113,48 @@ app.put('/game/:id', (req, res) => {
     }
 })
 
-app.post('/users', (req, res) => {
-    var usuario = {
-        name: "Erick Patrick",
-        email: "erick@email.com",
-        password: '123456'
-    }
+app.post("/auth", async(req, res) => {
+    var {email, password} = req.body
 
-    User.create({
-        ...usuario
-    }).then(() => {
-        res.json("Feito!")
-    }).catch(err => {
-        res.json("Ocorreu um erro: "+ err)
-    })
+    if(email != undefined){
+        user = await User.findOne({
+            where: {email: email}
+        })
+        if (user != undefined){
+
+            if (user.password == password){
+                res.status = 200
+                res.json({token: "TOKEN_FALSO"})
+            }else{
+                res.status = 401
+                res.json({err: "Credenciais inválidas."})
+            }
+
+        }else{
+            res.status = 404
+        }
+    }else{
+        res.status = 400
+        res.json({err: "Email inválido."})
+    }
 })
 
 app.listen(45678, () => {
     console.log('API rodando!');
 })
+
+// app.post('/users', (req, res) => {
+//     var usuario = {
+//         name: "Erick Patrick",
+//         email: "erick@email.com",
+//         password: '123456'
+//     }
+
+//     User.create({
+//         ...usuario
+//     }).then(() => {
+//         res.json("Feito!")
+//     }).catch(err => {
+//         res.json("Ocorreu um erro: "+ err)
+//     })
+// })
