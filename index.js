@@ -78,40 +78,42 @@ app.delete('/game/:id', (req, res) => {
     } 
 })
 
-app.put('/game/:id', (req, res) => {
-    
-    async function up(params, where) {
-        try {
-            await Game.update( {...params}, {where: {...where}})
-            res.sendStatus(200)   
-        } catch (error) {
-            res.sendStatus(404)
-        }
+app.put('/game/:id', async (req, res) => {
+    if (isNaN(req.params.id)) {
+        return res.sendStatus(400); // Retorna se o ID não for um número
     }
-    
-    if(isNaN(req.params.id)){
-        res.sendStatus(400);
-    }else{
-        var id = parseInt(req.params.id)
 
-        var {title, year, price} = req.body;
-        if(title !== undefined){
-            up({title: title}, {id: id});
+    const id = parseInt(req.params.id);
+    const { title, year, price } = req.body;
+
+    try {
+        // Array para armazenar as atualizações
+        const updates = [];
+
+        // Adiciona as atualizações de acordo com os parâmetros enviados
+        if (title !== undefined) {
+            updates.push(Game.update({ title }, { where: { id } }));
         }
-
-        if(year !== undefined){
-            up({year: year}, {id: id});
+        if (year !== undefined) {
+            updates.push(Game.update({ year }, { where: { id } }));
         }
-
-        if(price !== undefined){
-            if(isNaN(price)){
-                res.sendStatus(400)
-            }else{
-                up({price: price}, {id: id});
+        if (price !== undefined) {
+            if (isNaN(price)) {
+                return res.sendStatus(400); // Retorna se o preço não for um número
             }
+            updates.push(Game.update({ price }, { where: { id } }));
         }
+
+        // Aguarda todas as atualizações serem concluídas
+        await Promise.all(updates);
+
+        res.sendStatus(200); // Envia uma única resposta de sucesso
+    } catch (error) {
+        console.error(error); // Loga o erro para depuração
+        res.sendStatus(404); // Envia uma resposta de erro
     }
-})
+});
+
 
 app.post("/auth", async(req, res) => {
     var {email, password} = req.body
