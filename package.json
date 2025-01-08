@@ -1,7 +1,7 @@
 {
   "name": "api-rest",
   "version": "1.0.0",
-  "description": "",
+  "description": "API de games para uma loja fictícia, criada para o estudo de API REST.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +14,13 @@
     "express": "^4.18.2",
     "mysql2": "^3.1.2",
     "sequelize": "^6.29.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Homura-san/games-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Homura-san/games-api/issues"
+  },
+  "homepage": "https://github.com/Homura-san/games-api#readme"
 }
