@@ -84,7 +84,7 @@
             if(response.status == 200){
                 alert('Game Atualizado!')
             }
-        }).catch(err => console.log(err, " Erro: " , error.response.data));
+        }).catch(err => console.log(err));
     }
 
     axios.get('http://localhost:45678/games').then(response => {
