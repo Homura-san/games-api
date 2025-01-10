@@ -1,18 +1,23 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
-const cors = require('cors')
+require('dotenv').config()
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
-const connection = require('./database/database')
+const connection = require('./database/database');
 
-const Game = require('./games/Game')
-const User = require('./users/User')
+const Game = require('./games/Game');
+const User = require('./users/User');
 
-app.use(cors())
+app.use(cors());
 
 // Body parser
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
+// JWT
+const JWTsecret = process.env.JWTSECRET;
 
 // Database
 connection
@@ -130,9 +135,16 @@ app.post("/auth", async(req, res) => {
         if (user != undefined){
 
             if (user.password == password){
-                res.status = 200;
-                res.json({token: "TOKEN_FALSO"})
-            }else{
+                jwt.sign({id: user.id, email: user.email}, JWTsecret, {expiresIn: '48h'}, (err, token) => {
+                    if(err){
+                        res.status = 400;
+                        res.json({err: "Falha interna"})
+                    }else{
+                        res.status = 200;
+                        res.json({token: token})
+                    }
+                })
+            }else{ 
                 res.status = 401;
                 res.json({err: "Credenciais inválidas."})
             }
