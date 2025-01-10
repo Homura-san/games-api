@@ -22,10 +22,12 @@ connection
     }).catch((err) => {console.log(err)})
 
 
+    // Requisitar todos os dados da tabela games
     app.get('/games', (req, res) => {
     Game.findAll().then(game => res.json(game))
 })
 
+// Requisitar dado por id
 app.get('/game/:id', (req, res) => {
     if(isNaN(req.params.id)){
         res.sendStatus(400);
@@ -45,7 +47,7 @@ app.get('/game/:id', (req, res) => {
     }    
 })
 
-// Atualizado pro sequelize
+// Criar novo game
 app.post('/game', (req, res) => {
     // Precisa de verificação
     var {title, year, price} = req.body;
@@ -66,6 +68,7 @@ app.post('/game', (req, res) => {
     }
 })
 
+// Deletar game por id
 app.delete('/game/:id', (req, res) => {
     if(isNaN(req.params.id)){
         res.sendStatus(400);
@@ -78,6 +81,7 @@ app.delete('/game/:id', (req, res) => {
     } 
 })
 
+// editar dados do game
 app.put('/game/:id', async (req, res) => {
     if (isNaN(req.params.id)) {
         return res.sendStatus(400); // Retorna se o ID não for um número
@@ -115,6 +119,7 @@ app.put('/game/:id', async (req, res) => {
 });
 
 
+// Autenticação da API - Requer implementar JWT
 app.post("/auth", async(req, res) => {
     var {email, password} = req.body
 
@@ -125,21 +130,48 @@ app.post("/auth", async(req, res) => {
         if (user != undefined){
 
             if (user.password == password){
-                res.status = 200
+                res.status = 200;
                 res.json({token: "TOKEN_FALSO"})
             }else{
-                res.status = 401
+                res.status = 401;
                 res.json({err: "Credenciais inválidas."})
             }
 
         }else{
-            res.status = 404
+            res.status = 404;
+            res.json({err: "O E-mail enviado não existe na base de dados!"})    
         }
     }else{
-        res.status = 400
-        res.json({err: "Email inválido."})
+        res.status = 400;
+        res.json({err: "O Email enviado é inválido."})
     }
 })
+
+// Cadastro de usuários - Implementar
+app.post('/user', async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        // Se algum campo estiver ausente, retorna um erro 400
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    try {
+        // Cria o usuário no banco de dados
+        await User.create({
+            name,
+            email,
+            password
+        });
+
+        // Retorna sucesso
+        res.sendStatus(201); // 201 é o status correto para criação de recursos
+    } catch (err) {
+        console.error(err); // Loga o erro para depuração
+        res.status(500).json({ error: 'Erro no servidor ao criar o usuário.' }); // Envia um erro mais informativo
+    }
+});
+
 
 app.listen(45678, () => {
     console.log('API rodando!');
