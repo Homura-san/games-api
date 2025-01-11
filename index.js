@@ -3,7 +3,10 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+
+// Autenticação JWT
 const jwt = require('jsonwebtoken');
+const auth = require('./auth');
 
 const connection = require('./database/database');
 
@@ -24,12 +27,16 @@ connection
     .authenticate()
     .then(() => {
         console.log('Conexão feita')
-    }).catch((err) => {console.log(err)})
+    })
+    .catch((err) => {console.log(err)})
+//
 
 
-    // Requisitar todos os dados da tabela games
-    app.get('/games', (req, res) => {
-    Game.findAll().then(game => res.json(game))
+
+// Requisitar todos os dados da tabela games
+app.get('/games', auth, (req, res) => {
+    res.statusCode = 200;
+    Game.findAll().then(game => res.json({user: req.loggedUser, game: game}))
 })
 
 // Requisitar dado por id
