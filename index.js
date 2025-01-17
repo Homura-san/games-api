@@ -8,6 +8,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const auth = require('./auth');
 
+// Database
 const connection = require('./database/database');
 
 const Game = require('./games/Game');
@@ -35,8 +36,26 @@ connection
 
 // Requisitar todos os dados da tabela games
 app.get('/games', auth, (req, res) => {
+    var HATEOAS = [
+        {
+            href: "http://localhost:45678/game",
+            method: "POST",
+            rel: "create_game"
+        },
+        {
+            href: "http://localhost:45678/user",
+            method: "POST",
+            rel: "register_login"
+        },
+        {
+            href: "http://localhost:45678/auth",
+            method: "POST",
+            rel: "login"
+        }
+    ]
+
     res.statusCode = 200;
-    Game.findAll().then(game => res.json({user: req.loggedUser, game: game}))
+    Game.findAll().then(game => res.json({user: req.loggedUser, game: game, _links: HATEOAS}))
 })
 
 // Requisitar dado por id
@@ -46,12 +65,40 @@ app.get('/game/:id', (req, res) => {
     }else{
         var id = parseInt(req.params.id)
 
+        var HATEOAS = [
+            {
+                href: "http://localhost:45678/game/" + id,
+                method: "GET",
+                rel: "get_game"
+            },
+            {
+                href: "http://localhost:45678/game/" + id,
+                method: "DELETE",
+                rel: "delete_game"
+            },
+            {
+                href: "http://localhost:45678/game/" + id,
+                method: "PUT",
+                rel: "edit_game"
+            },
+            {
+                href: "http://localhost:45678/game",
+                method: "POST",
+                rel: "create_game"
+            },
+            {
+                href: "http://localhost:45678/games",
+                method: "GET",
+                rel: "get_all_games"
+            }
+        ]
+
         Game.findOne({
             where: {id}
         }).then(game => {
             if(game != undefined){
                 res.statusCode = 200;
-                res.json(game)
+                res.json({game: game, _links: HATEOAS})
             }else{
                 res.sendStatus(404);
             }
@@ -63,6 +110,8 @@ app.get('/game/:id', (req, res) => {
 app.post('/game', (req, res) => {
     // Precisa de verificação
     var {title, year, price} = req.body;
+
+    
 
     if(title !== undefined && year !== undefined && price !== undefined){
         Game.create({
@@ -195,19 +244,3 @@ app.post('/user', async (req, res) => {
 app.listen(45678, () => {
     console.log('API rodando!');
 })
-
-// app.post('/users', (req, res) => {
-//     var usuario = {
-//         name: "Erick Patrick",
-//         email: "erick@email.com",
-//         password: '123456'
-//     }
-
-//     User.create({
-//         ...usuario
-//     }).then(() => {
-//         res.json("Feito!")
-//     }).catch(err => {
-//         res.json("Ocorreu um erro: "+ err)
-//     })
-// })
